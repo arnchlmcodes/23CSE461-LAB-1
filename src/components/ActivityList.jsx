@@ -48,6 +48,14 @@ const ActivityList = () => {
                 title="Numbers"
                 color="#f687b3"
             />
+
+            {/* AI Generator Card */}
+            <CategoryCard
+                to="/generate-quiz"
+                icon={<span style={{ fontSize: '3rem', lineHeight: '1' }}>✨</span>}
+                title="AI Quiz"
+                color="#8b5cf6"
+            />
         </div>
     );
 };

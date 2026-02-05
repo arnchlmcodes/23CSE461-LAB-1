@@ -3,6 +3,7 @@ import Home from './components/Home';
 import ColorMatch from './components/ColorMatch';
 import ShapeMatch from './components/ShapeMatch';
 import EmojiGame from './components/EmojiGame';
+import QuizGenerator from './components/QuizGenerator';
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
           path="/activities/numbers"
           element={<EmojiGame category="numbers" completionMessage="You are great at counting!" />}
         />
+
+        {/* AI Quiz Generator Route */}
+        <Route path="/generate-quiz" element={<QuizGenerator />} />
 
         <Route path="*" element={<Home />} />
       </Routes>

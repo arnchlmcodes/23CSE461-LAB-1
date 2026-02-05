@@ -18,6 +18,18 @@ const Navbar = () => (
             </div>
             <span>Home</span>
         </Link>
+        <Link to="/generate-quiz" style={{
+            marginLeft: 'auto',
+            textDecoration: 'none',
+            color: 'white',
+            fontWeight: 'bold',
+            background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+            padding: '0.8rem 1.5rem',
+            borderRadius: '24px',
+            boxShadow: '0 4px 6px rgba(139, 92, 246, 0.3)'
+        }}>
+            ✨ AI Quiz
+        </Link>
     </nav>
 );
 
