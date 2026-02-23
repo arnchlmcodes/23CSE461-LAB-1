@@ -52,7 +52,7 @@ const ActivityList = () => {
             {/* AI Generator Card */}
             <CategoryCard
                 to="/generate-quiz"
-                icon={<span style={{ fontSize: '3rem', lineHeight: '1' }}>✨</span>}
+                icon={<span style={{ fontSize: '3rem', lineHeight: '1' }}>🧠</span>}
                 title="AI Quiz"
                 color="#8b5cf6"
             />

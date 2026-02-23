@@ -28,7 +28,7 @@ const Navbar = () => (
             borderRadius: '24px',
             boxShadow: '0 4px 6px rgba(139, 92, 246, 0.3)'
         }}>
-            ✨ AI Quiz
+            AI Quiz
         </Link>
     </nav>
 );

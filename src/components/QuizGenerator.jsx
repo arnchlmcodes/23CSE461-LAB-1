@@ -27,7 +27,7 @@ const QuizHeader = ({ title, subtitle }) => (
    - Demonstrates 'Routing' (via useNavigate).
    ================================================================================
 */
-const QuizForm = ({ onSubmit, initialData }) => {
+const QuizForm = ({ onSubmit, initialData, error }) => {
     // HOOK: useState (State Management in Function Component)
     const [localFormData, setLocalFormData] = useState(initialData);
     const [showAdvanced, setShowAdvanced] = useState(false);
@@ -74,6 +74,12 @@ const QuizForm = ({ onSubmit, initialData }) => {
             {/* Stateless Component Usage */}
             <QuizHeader title="Create Your Quiz" subtitle="Customize your learning experience" />
 
+            {error && (
+                <div style={{ background: '#fee2e2', color: '#991b1b', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
+                    {error}
+                </div>
+            )}
+
             <button
                 onClick={() => navigate('/')}
                 className="btn-text"
@@ -91,8 +97,13 @@ const QuizForm = ({ onSubmit, initialData }) => {
                         <option value="Animals">Animals</option>
                         <option value="Colors">Colors</option>
                         <option value="Shapes">Shapes</option>
+                        <option value="Numbers">Numbers</option>
+                        <option value="Letters">Letters</option>
                         <option value="Emotions">Emotions</option>
                         <option value="Daily Routine">Daily Routine</option>
+                        <option value="Food">Food</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Weather">Weather</option>
                     </select>
                 </div>
 
@@ -101,18 +112,57 @@ const QuizForm = ({ onSubmit, initialData }) => {
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Difficulty</label>
                         <select name="difficulty" value={localFormData.difficulty} onChange={handleChange}
                             style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}>
+                            <option value="Very Easy">Very Easy</option>
                             <option value="Easy">Easy</option>
                             <option value="Medium">Medium</option>
+                            <option value="Challenging">Challenging</option>
                         </select>
                     </div>
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Age</label>
                         <select name="ageGroup" value={localFormData.ageGroup} onChange={handleChange}
                             style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}>
-                            <option value="3-5">3-5</option>
-                            <option value="6-8">6-8</option>
+                            <option value="3-4">3-4 years</option>
+                            <option value="5-6">5-6 years</option>
+                            <option value="7-8">7-8 years</option>
+                            <option value="9-10">9-10 years</option>
+                            <option value="11-12">11-12 years</option>
                         </select>
                     </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Quiz Length</label>
+                        <select name="quizLength" value={localFormData.quizLength} onChange={handleChange}
+                            style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}>
+                            <option value="5">5 questions</option>
+                            <option value="10">10 questions</option>
+                            <option value="15">15 questions</option>
+                            <option value="20">20 questions</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Learning Style</label>
+                        <select name="learningStyle" value={localFormData.learningStyle} onChange={handleChange}
+                            style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}>
+                            <option value="Visual">Visual</option>
+                            <option value="Auditory">Auditory</option>
+                            <option value="Kinesthetic">Hands-on</option>
+                            <option value="Mixed">Mixed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Question Type</label>
+                    <select name="questionType" value={localFormData.questionType} onChange={handleChange}
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}>
+                        <option value="Multiple Choice">Multiple Choice</option>
+                        <option value="True/False">True/False</option>
+                        <option value="Picture Match">Picture Match</option>
+                        <option value="Mixed">Mixed Types</option>
+                    </select>
                 </div>
 
                 {/* Conditional Rendering based on State (Hooks) */}
@@ -128,20 +178,57 @@ const QuizForm = ({ onSubmit, initialData }) => {
 
                     {showAdvanced && (
                         <div className="animate-fade-in" style={{ marginTop: '1rem', background: '#f9fafb', padding: '1rem', borderRadius: '8px' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Sensory Preferences</label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                {['Minimal Text', 'No Sound', 'Muted Colors'].map(mode => (
-                                    <label key={mode} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
-                                        <input
-                                            type="checkbox"
-                                            name="sensoryMode"
-                                            value={mode}
-                                            checked={localFormData.sensoryMode.includes(mode)}
-                                            onChange={handleChange}
-                                        />
-                                        {mode}
-                                    </label>
-                                ))}
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Sensory Preferences</label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    {['Minimal Text', 'No Sound', 'Muted Colors', 'Large Text', 'High Contrast'].map(mode => (
+                                        <label key={mode} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                                            <input
+                                                type="checkbox"
+                                                name="sensoryMode"
+                                                value={mode}
+                                                checked={localFormData.sensoryMode.includes(mode)}
+                                                onChange={handleChange}
+                                            />
+                                            {mode}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Attention Span</label>
+                                    <select name="attentionSpan" value={localFormData.attentionSpan} onChange={handleChange}
+                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}>
+                                        <option value="Very Short">Very Short (2-3 min)</option>
+                                        <option value="Short">Short (5-7 min)</option>
+                                        <option value="Medium">Medium (10-15 min)</option>
+                                        <option value="Long">Long (15+ min)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Support Level</label>
+                                    <select name="supportLevel" value={localFormData.supportLevel} onChange={handleChange}
+                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}>
+                                        <option value="Independent">Independent</option>
+                                        <option value="Minimal Support">Minimal Support</option>
+                                        <option value="Moderate Support">Moderate Support</option>
+                                        <option value="High Support">High Support</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Special Interests (Optional)</label>
+                                <input
+                                    type="text"
+                                    name="specialInterests"
+                                    value={localFormData.specialInterests}
+                                    onChange={handleChange}
+                                    placeholder="e.g., trains, dinosaurs, music..."
+                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', border: '2px solid #e5e7eb' }}
+                                />
                             </div>
                         </div>
                     )}
@@ -267,8 +354,23 @@ class QuizGenerator extends Component {
                         </button>
                     ))}
                 </div>
-                {feedback === 'correct' && <h2 style={{ color: 'green', marginTop: '1rem' }}>Correct! 🎉</h2>}
-                {feedback === 'incorrect' && <h2 style={{ color: 'red', marginTop: '1rem' }}>Nice try!</h2>}
+                {feedback === 'correct' && (
+                    <div style={{ marginTop: '1rem' }}>
+                        <h2 style={{ color: 'green' }}>Correct! 🎉</h2>
+                        <p style={{ background: '#d1fae5', padding: '1rem', borderRadius: '8px', marginTop: '0.5rem' }}>
+                            {question.explanation}
+                        </p>
+                    </div>
+                )}
+                {feedback === 'incorrect' && (
+                    <div style={{ marginTop: '1rem' }}>
+                        <h2 style={{ color: 'red' }}>Nice try!</h2>
+                        <p style={{ background: '#fee2e2', padding: '1rem', borderRadius: '8px', marginTop: '0.5rem' }}>
+                            The correct answer is: <strong>{question.correctAnswer}</strong><br/>
+                            {question.explanation}
+                        </p>
+                    </div>
+                )}
             </div>
         );
     }
@@ -283,11 +385,17 @@ class QuizGenerator extends Component {
                         initialData={{
                             topic: 'Animals', // Default State
                             difficulty: 'Easy',
-                            ageGroup: '6-8',
+                            ageGroup: '7-8',
+                            quizLength: '10',
+                            learningStyle: 'Visual',
+                            questionType: 'Multiple Choice',
                             sensoryMode: [],
-                            attentionSpan: 'Short'
+                            attentionSpan: 'Short',
+                            supportLevel: 'Minimal Support',
+                            specialInterests: ''
                         }}
                         onSubmit={this.handleFormSubmit}
+                        error={this.state.error}
                     />
                 )}
 

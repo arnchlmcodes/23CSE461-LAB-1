@@ -1,6 +1,6 @@
 
 import express from 'express';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,56 +12,88 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const router = express.Router();
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_API_KEY_HERE");
+// Initialize Groq
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY || "YOUR_API_KEY_HERE"
+});
 
 router.post('/', async (req, res) => {
     try {
-        const { ageGroup, difficulty, topic, sensoryMode, attentionSpan } = req.body;
+        const { ageGroup, difficulty, topic, sensoryMode, attentionSpan, quizLength, learningStyle, questionType, supportLevel, specialInterests } = req.body;
 
         // Construct the prompt based on user inputs
-        // Note: We ask for JSON only to ensure easy parsing
         const prompt = `
-        You are an assistant that creates autism-friendly quiz questions for children.
+        You are an expert educational assistant specializing in creating autism-friendly quiz questions for children.
         
-        Rules:
-        - Use very simple language suitable for age ${ageGroup}
-        - No metaphors, idioms, or abstract concepts
-        - ${sensoryMode.includes('Minimal Text') ? 'Use extremely short sentences (max 5 words)' : 'Use simple sentences'}
+        STRICT REQUIREMENTS:
+        - Use very simple, clear language appropriate for age ${ageGroup}
+        - NO metaphors, idioms, sarcasm, or abstract concepts
+        - ${sensoryMode.includes('Minimal Text') ? 'Use extremely short sentences (max 5 words per sentence)' : 'Use simple, direct sentences'}
+        - ${sensoryMode.includes('Large Text') ? 'Design for large text display' : ''}
+        - ${sensoryMode.includes('High Contrast') ? 'Consider high contrast visual elements' : ''}
         - One clear concept per question
-        - Positive and encouraging tone
-        - Output must be valid JSON array ONLY. No markdown formatting, no code blocks.
+        - Positive, encouraging, and supportive tone
+        - ${supportLevel === 'High Support' ? 'Provide extra clear instructions and simple language' : ''}
+        - ${supportLevel === 'Independent' ? 'Can use slightly more complex language' : ''}
+        - Output must be valid JSON array ONLY. No markdown formatting, no code blocks, no explanations.
 
-        Child details:
-        - Age group: ${ageGroup}
-        - Difficulty: ${difficulty}
+        CHILD PROFILE:
+        - Age: ${ageGroup} years old
+        - Difficulty Level: ${difficulty}
         - Topic: ${topic}
-        - Count: ${attentionSpan === 'Short' ? 5 : 10} questions
+        - Learning Style: ${learningStyle}
+        - Question Type: ${questionType}
+        - Quiz Length: ${quizLength} questions
+        - Attention Span: ${attentionSpan}
+        - Support Level: ${supportLevel}
+        ${specialInterests ? `- Special Interests: ${specialInterests} (try to incorporate these when relevant)` : ''}
+        - Sensory Preferences: ${sensoryMode.length > 0 ? sensoryMode.join(', ') : 'None specified'}
 
-        Generate a JSON array of objects. Each object must have:
-        - "id" (number)
-        - "question" (string)
-        - "options" (array of exactly 3 strings)
-        - "correctAnswer" (string, must be one of the options)
-        - "visualHint" (string, a short description of what a visual aid would look like, e.g., "A red apple")
+        CONTENT GUIDELINES:
+        - ${learningStyle === 'Visual' ? 'Focus on visual descriptions and picture-based questions' : ''}
+        - ${learningStyle === 'Auditory' ? 'Include sound-related questions and descriptions' : ''}
+        - ${learningStyle === 'Kinesthetic' ? 'Include action-based and movement-related questions' : ''}
+        - ${questionType === 'True/False' ? 'Create simple true/false questions' : ''}
+        - ${questionType === 'Picture Match' ? 'Focus on visual matching and identification' : ''}
+        - ${attentionSpan === 'Very Short' ? 'Keep questions very simple and quick to answer' : ''}
+        - ${attentionSpan === 'Long' ? 'Can include slightly more detailed questions' : ''}
 
-        Example Output format:
+        Generate exactly ${quizLength} questions as a JSON array. Each object must have:
+        - "id" (number, starting from 1)
+        - "question" (string, clear and simple)
+        - "options" (array of exactly 3 strings for multiple choice, or 2 for true/false)
+        - "correctAnswer" (string, must exactly match one of the options)
+        - "visualHint" (string, describe what a helpful visual aid would show)
+        - "explanation" (string, simple explanation of why the answer is correct)
+
+        Example format:
         [
             {
                 "id": 1,
-                "question": "Which one is RED?",
-                "options": ["Apple", "Grass", "Sky"],
-                "correctAnswer": "Apple",
-                "visualHint": "Red apple"
+                "question": "What color is the sun?",
+                "options": ["Yellow", "Blue", "Green"],
+                "correctAnswer": "Yellow",
+                "visualHint": "Bright yellow sun in the sky",
+                "explanation": "The sun looks yellow when we see it in the sky"
             }
         ]
+
+        Remember: Create exactly ${quizLength} questions about ${topic} at ${difficulty} level for a ${ageGroup} year old child.
         `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            model: "llama-3.1-8b-instant",
+            temperature: 0.7,
+            max_tokens: 2048,
+        });
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        let text = response.text();
+        let text = chatCompletion.choices[0]?.message?.content || "";
 
         // Clean up markdown if model adds it
         text = text.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -71,7 +103,7 @@ router.post('/', async (req, res) => {
         res.json({ quiz });
 
     } catch (error) {
-        console.error("GenAI Error:", error);
+        console.error("Groq Error:", error);
         res.status(500).json({
             error: "Failed to generate quiz",
             details: error.message
